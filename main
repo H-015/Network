@@ -1,0 +1,109 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create a figure and axes
+fig, ax = plt.subplots()
+
+# Set the size of the figure
+fig.set_size_inches(10, 10)
+
+# Create the center point (you)
+ax.plot(0, 0, 'ro', markersize=10)
+
+# Create the circles with only outlines and names
+circle1 = plt.Circle((0, 0), radius=1, color='black', fill=False, linewidth=2)
+ax.add_patch(circle1)
+ax.text(0, 0.5, "Круг поддержки", ha='center', va='center', color='gray')
+
+circle2 = plt.Circle((0, 0), radius=2.5, color='black', fill=False, linewidth=2)
+ax.add_patch(circle2)
+ax.text(0, 1.25, "Круг продуктивности", ha='center', va='center', color='gray')
+
+circle3 = plt.Circle((0, 0), radius=7.5, color='black', fill=False, linewidth=2)
+ax.add_patch(circle3)
+ax.text(0, 3.75, "Круг развития", ha='center', va='center', color='gray')
+
+# Create the sectors (areas of life)
+n_sectors = 8  # Number of sectors
+angles = np.linspace(0, 2*np.pi, n_sectors, endpoint=False)
+sector_names = [
+    "Работа", "Бар", "Школа ведущих/Театр", "KiberOne", 
+    "Прочее", "", "", ""
+]
+for i, angle in enumerate(angles):
+    x = 9 * np.cos(angle)
+    y = 9 * np.sin(angle)
+    ax.plot([0, x], [0, y], 'k-', linewidth=1)
+    ax.text(x * 1.1, y * 1.1, sector_names[i], ha='center', va='center')
+
+# Function to place contacts on the map
+def place_contact(name, importance, sector_angle):
+    """Places a contact on the map based on importance and sector.
+
+    Args:
+        name: The name of the contact.
+        importance: A value from 1 to 5 representing importance (1 being least important, 5 being most important).
+        sector_angle: The angle of the sector where the contact belongs.
+    """
+    radius = 1 + (importance - 1) * 6 / 4  # Adjust radius based on importance
+    x = radius * np.cos(sector_angle)
+    y = radius * np.sin(sector_angle)
+    ax.plot(x, y, 'bo', markersize=importance * 2)
+    ax.text(x + 0.2, y + 0.2, name, fontsize=8)
+
+# Example contacts (replace with your own)
+contacts = [
+    ("John Doe", 5, 0),  # Most important, sector 0
+    ("Jane Smith", 3, np.pi / 4),  # Moderately important, sector 1
+    ("Peter Jones", 2, np.pi / 2),  # Less important, sector 2
+    # ... add more contacts
+]
+
+# Place contacts on the map
+for name, importance, sector_angle in contacts:
+    place_contact(name, importance, sector_angle)
+
+# Function to draw connections between contacts
+def draw_connection(contact1, contact2, relationship_type):
+    """Draws a connection between two contacts based on relationship type.
+
+    Args:
+        contact1: The first contact.
+        contact2: The second contact.
+        relationship_type: A string representing the relationship type (e.g., "strong", "sporadic", "mutual").
+    """
+    x1 = contact1[1] * np.cos(contact1[2])
+    y1 = contact1[1] * np.sin(contact1[2])
+    x2 = contact2[1] * np.cos(contact2[2])
+    y2 = contact2[1] * np.sin(contact2[2])
+
+    if relationship_type == "strong":
+        ax.plot([x1, x2], [y1, y2], 'k-', linewidth=2)
+    elif relationship_type == "sporadic":
+        ax.plot([x1, x2], [y1, y2], 'k--', linewidth=1)
+    elif relationship_type == "mutual":
+        ax.plot([x1, x2], [y1, y2], 'k-', linewidth=1)
+        ax.arrow(x1, y1, (x2 - x1) / 2, (y2 - y1) / 2, head_width=0.2, head_length=0.3)
+        ax.arrow(x2, y2, (x1 - x2) / 2, (y1 - y2) / 2, head_width=0.2, head_length=0.3)
+
+# Example connections (replace with your own)
+connections = [
+    (("John Doe", 5, 0), ("Jane Smith", 3, np.pi / 4), "strong"),
+    (("Jane Smith", 3, np.pi / 4), ("Peter Jones", 2, np.pi / 2), "sporadic"),
+    # ... add more connections
+]
+
+# Draw connections on the map
+for contact1, contact2, relationship_type in connections:
+    draw_connection(contact1, contact2, relationship_type)
+
+# Set the limits of the axes
+ax.set_xlim(-10, 10)
+ax.set_ylim(-10, 10)
+
+# Remove the axes ticks and labels
+ax.set_xticks([])
+ax.set_yticks([])
+
+# Display the plot
+plt.show()

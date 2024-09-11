@@ -48,7 +48,7 @@ def place_contact(name, importance, sector_angle):
     radius = 1 + (importance - 1) * 6 / 4  # Adjust radius based on importance
     x = radius * np.cos(sector_angle)
     y = radius * np.sin(sector_angle)
-    ax.plot(x, y, 'bo', markersize=importance * 2)
+    contact_point, = ax.plot(x, y, 'bo', markersize=importance * 2, picker=5, label=name)
     ax.text(x + 0.2, y + 0.2, name, fontsize=8)
 
 # Example contacts (replace with your own)
@@ -88,14 +88,57 @@ def draw_connection(contact1, contact2, relationship_type):
 
 # Example connections (replace with your own)
 connections = [
-    (("John Doe", 5, 0), ("Jane Smith", 3, np.pi / 4), "strong"),
-    (("Jane Smith", 3, np.pi / 4), ("Peter Jones", 2, np.pi / 2), "sporadic"),
     # ... add more connections
 ]
 
-# Draw connections on the map
-for contact1, contact2, relationship_type in connections:
-    draw_connection(contact1, contact2, relationship_type)
+# Function to show contact profile
+def show_profile(event):
+    """Shows the profile of a contact when their point is clicked."""
+    contact_name = event.artist.get_label()
+    if contact_name:
+        # Get the coordinates of the clicked point
+        x, y = event.artist.get_data()
+        x = x[0]
+        y = y[0]
+
+        # Create an annotation box
+        annotation = ax.annotate(
+            f"Анкета контакта: {contact_name}",
+            xy=(x, y),
+            xytext=(x + 0.5, y + 0.5),
+            arrowprops=dict(arrowstyle="->"),
+            bbox=dict(boxstyle="round", fc="lightblue", alpha=0.5),
+        )
+
+        # Connect the annotation to the figure's canvas
+        annotation.set_visible(True)
+        fig.canvas.draw_idle()
+
+        # Function to hide the annotation when the figure is clicked again
+        def hide_annotation(event):
+            annotation.set_visible(False)
+            fig.canvas.draw_idle()
+
+        # Connect the click event to the hide_annotation function
+        fig.canvas.mpl_connect('button_press_event', hide_annotation)
+
+# Function to handle right-click events
+def on_right_click(event):
+    """Handles right-click events to connect contacts."""
+    if event.button == 3:
+        # Get the clicked contact
+        clicked_contact = event.artist
+        clicked_name = clicked_contact.get_label()
+
+        # Show a context menu
+        print(f"Выбрано: {clicked_name}")
+        # Here you can add code to display a context menu with options to connect with other contacts
+
+# Connect the pick event to the show_profile function
+fig.canvas.mpl_connect('pick_event', show_profile)
+
+# Connect the right-click event to the on_right_click function
+fig.canvas.mpl_connect('button_press_event', on_right_click)
 
 # Set the limits of the axes
 ax.set_xlim(-10, 10)
